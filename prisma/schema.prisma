@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  username      String       @unique
+  password      String
+  createAt      DateTime     @default(now())
+  email         String       @unique
+  ownerTo       Task[]       @relation("taskAuthor")
+  assignedTo    Task[]       @relation("assignedTo")
+  memberToTeams UserToTeam[]
+  teamOwner     Team[]
+}
+
+model Team {
+  id      Int          @id @default(autoincrement())
+  name    String
+  owner   User         @relation(fields: [ownerId], references: [id])
+  ownerId Int
+  code    String       @unique @default(uuid())
+  tasks   Task[]
+  members UserToTeam[]
+
+  @@unique([id, ownerId])
+}
+
+model UserToTeam {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  team   Team @relation(fields: [teamId], references: [id])
+  teamId Int
+
+  @@unique([userId, teamId])
+}
+
+enum PRIORITY {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum STATUS {
+  NOT_ASSIGNED
+  IN_PROGRESS
+  QA
+  DONE
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  priority    PRIORITY? @default(LOW)
+  description String
+  author      User      @relation("taskAuthor", fields: [authorId], references: [id])
+  authorId    Int
+  assign      User?     @relation("assignedTo", fields: [assignedId], references: [id])
+  assignedId  Int?
+  status      STATUS?   @default(NOT_ASSIGNED)
+  team        Team      @relation(fields: [teamId], references: [id])
+  teamId      Int
+
+  @@unique([id, authorId])
+}
