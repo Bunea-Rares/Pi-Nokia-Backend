@@ -10,14 +10,18 @@ export const getTeams = async (req: Request, res: Response) => {
       include: {
         team: true,
       },
+      take: 10,
+      cursor: {
+        id: Number(req.query.cursor),
+      },
     });
-    res.json(teams);
+    res.json({ teams, cursor: teams[teams.length - 1]?.id });
   } catch (e: any) {
     res.json(e);
   }
 };
 
-export const getTeam = async (req: Request, res: Response) => {
+export const getTeamById = async (req: Request, res: Response) => {
   try {
     const team = await prisma.userToTeam.findUnique({
       where: {

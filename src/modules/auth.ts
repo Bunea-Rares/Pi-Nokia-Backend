@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 export const comparePasswords = (password: any, hashPassword: any) => {
@@ -20,7 +20,7 @@ export const protect = (req: any, res: any, next: any) => {
   const [, token] = bearer.split(" ");
 
   try {
-    const user = jwt.verify(token, "SUGUS");
+    const user = jwt.verify(token, process.env.JWT_SECRET as Secret);
     req.body.user = user;
     next();
   } catch (e) {

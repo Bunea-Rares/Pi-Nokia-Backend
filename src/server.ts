@@ -2,7 +2,13 @@ import express from "express";
 import router from "./router";
 import morgan from "morgan";
 import { protect } from "./modules/auth";
-import { createUser, signIn } from "./handlers/user";
+import {
+  confirmMail,
+  createUser,
+  handlePasswordReset,
+  sendPasswordReset,
+  signIn,
+} from "./handlers/user";
 import cors from "cors";
 
 const app = express();
@@ -22,4 +28,7 @@ app.use("/api", protect, router);
 
 app.post("/register", createUser);
 app.post("/signin", signIn);
+app.get("/mailconfirmation", confirmMail);
+app.post("/sendpasswordreset", sendPasswordReset);
+app.post("/passwordreset", handlePasswordReset);
 export default app;

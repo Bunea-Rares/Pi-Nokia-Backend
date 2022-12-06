@@ -11,15 +11,35 @@ datasource db {
 }
 
 model User {
-  id            Int          @id @default(autoincrement())
-  username      String       @unique
-  password      String
-  createAt      DateTime     @default(now())
-  email         String       @unique
-  ownerTo       Task[]       @relation("taskAuthor")
-  assignedTo    Task[]       @relation("assignedTo")
-  memberToTeams UserToTeam[]
-  teamOwner     Team[]
+  id                    Int                     @id @default(autoincrement())
+  username              String                  @unique
+  password              String
+  createAt              DateTime                @default(now())
+  email                 String                  @unique
+  status                Boolean                 @default(false)
+  ownerTo               Task[]                  @relation("taskAuthor")
+  assignedTo            Task[]                  @relation("assignedTo")
+  memberToTeams         UserToTeam[]
+  teamOwner             Team[]
+  TokenMailConfirmation TokenMailConfirmation[]
+  TokenPasswordReset    TokenPasswordReset?
+}
+
+model TokenMailConfirmation {
+  // TODO: TIME TO LIVE
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int    @unique
+  token  String @unique @default(uuid())
+}
+
+model TokenPasswordReset {
+  id        Int    @id @default(autoincrement())
+  user      User   @relation(fields: [userEmail], references: [email])
+  userEmail String @unique
+  token     String @unique @default(uuid())
+
+  @@unique([userEmail, token])
 }
 
 model Team {
