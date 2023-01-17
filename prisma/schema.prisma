@@ -23,6 +23,8 @@ model User {
   teamOwner             Team[]
   TokenMailConfirmation TokenMailConfirmation[]
   TokenPasswordReset    TokenPasswordReset?
+  comments              Comment[]
+  // image                 String
 }
 
 model TokenMailConfirmation {
@@ -78,6 +80,15 @@ enum STATUS {
   DONE
 }
 
+model Comment {
+  id       Int    @id @default(autoincrement())
+  message  String
+  author   User   @relation(fields: [authorId], references: [id])
+  task     Task   @relation(fields: [taskId], references: [id])
+  taskId   Int
+  authorId Int
+}
+
 model Task {
   id          Int       @id @default(autoincrement())
   title       String
@@ -90,6 +101,8 @@ model Task {
   status      STATUS?   @default(NOT_ASSIGNED)
   team        Team      @relation(fields: [teamId], references: [id])
   teamId      Int
+  comments    Comment[]
+  createAt    DateTime  @default(now())
 
   @@unique([id, authorId])
 }

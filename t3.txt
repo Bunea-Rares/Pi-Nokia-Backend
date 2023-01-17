@@ -1,0 +1,134 @@
+const input = "23+4*5+(a+b)*c";
+
+let builder = "E";
+
+const rules = {
+  "E": ["TE'"],
+  "E'": ["+TE'", "-TE'", null],
+  "T": ["FT'"],
+  "T'": ["*FT'", "/FT'", null],
+  "F": ["(E)","NUM", "ID"],
+}
+
+let index = 0;
+
+const isOperatorE = () => {
+  return input[index] === "+" || input[index] === "-";
+}
+
+const isOperatorT = () => {
+  return input[index] === "*" || input[index] === "/";
+}
+
+const isNum = () => {
+  return input[index] >= "0" && input[index] <= "9";
+}
+
+const isId = () => {
+  return input[index] >= "a" && input[index] <= "z";
+}
+
+const replaceBuilder = (word, string) => {
+  let builderCopy = builder.split("").join("");
+  if(builder.length != 1) {
+    builderCopy = builderCopy.split("=")[builderCopy.split("=").length - 1];
+    builderCopy = builderCopy.replace(word, string);
+    return "=" + builderCopy;
+  } else {
+    return "=TE'"
+  }
+}
+
+const E = () => {
+  console.log("E -> TE'");
+  builder += replaceBuilder("E", "TE'")
+  if(T()) {
+    return E1();
+  }
+  return false;
+}
+
+const E1 = () => {
+  if(isOperatorE()) {
+    console.log("E' -> " + input[index] + "TE'");
+    builder += replaceBuilder("E'", input[index] + "TE'")
+    index++;
+    if(T()) {
+      return E1();
+    }
+    return false;
+  }
+  console.log("E' -> null");
+  builder += replaceBuilder("E'", "")
+  return true;
+}
+
+const T = () => {
+  console.log("T -> FT'");
+  builder += replaceBuilder("T", "FT'")
+  if(F()) {
+    return T1();
+  }
+  return false;
+}
+
+const T1 = () => {
+  if(isOperatorT()) {
+    console.log("T' -> " + input[index] + "FT'");
+    builder += replaceBuilder("T'",input[index] + "FT'")
+    index++;
+    if(F()) {
+      return T1();
+    }
+    return false;
+  }
+  console.log("T' -> null");
+  builder += replaceBuilder("T'", "")
+  return true;
+}
+
+
+const F = () => {
+  if (input[index] === "(") {
+    console.log("F -> (E)\n");
+    builder += replaceBuilder("F", "(E)");
+    index++;
+    if (E()) {
+      if (input[index] === ")") {
+        index++;
+        return true;
+      }
+      return false;
+    }
+    return false;
+  } else if (isNum()) {
+    let final = "";
+    while (isNum()) {
+      final += input[index];
+      index++;
+    }
+    console.log("F -> " + final + "\n");
+    builder += replaceBuilder("F", final)
+    return true;
+  } else if (isId()) {
+    let final = "";
+    if (isId()) {
+      final += input[index];
+      index++;
+    }
+    console.log("F -> " + final  + "\n");
+    builder += replaceBuilder("F", final)
+
+    return true;
+  }
+  return false;
+}
+
+if(E() && index === input.length) {
+  console.log("success");
+} else {
+  console.log("fail");
+}
+
+
+console.log(builder)

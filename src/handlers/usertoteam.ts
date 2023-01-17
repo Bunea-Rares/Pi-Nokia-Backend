@@ -45,7 +45,9 @@ export const leaveTeam = async (req: Request, res: Response) => {
     });
     await prisma.comment.deleteMany({
       where: {
-        authorId: Number(req.body.user.id),
+        task: {
+          teamId: Number(req.params.teamId),
+        },
       },
     });
     await prisma.task.deleteMany({

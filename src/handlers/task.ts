@@ -28,13 +28,13 @@ export const getAllTasks = async (req: Request, res: Response) => {
             ? (req.query.status as STATUS)
             : undefined
           : undefined,
-        authorId: req.query.author
-          ? req.query.authorId !== "undefined" && req.query.priority
+        authorId: req.query.authorId
+          ? req.query.authorId !== "undefined" && req.query.authorId
             ? Number(req.query.authorId)
             : undefined
           : undefined,
         assignedId: req.query.assignedId
-          ? req.query.assignedId !== "undefined" && req.query.priority
+          ? req.query.assignedId !== "undefined" && req.query.assignedId
             ? Number(req.query.assignedId)
             : undefined
           : undefined,
