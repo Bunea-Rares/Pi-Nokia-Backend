@@ -5,14 +5,6 @@ import { mailConfirmationTemplate } from "../template/mailconfirmation";
 import { mailResetPassword } from "../template/mailresetpassword";
 
 export const createUser = async (req: any, res: any) => {
-  // const user = await prisma.user.create({
-  //   data: {
-  // username: req.body.username,
-  // password: await hashPassword(req.body.password),
-  // email: req.body.email,
-  //   },
-  // });
-
   try {
     const user = await prisma.tokenMailConfirmation.create({
       data: {
@@ -35,6 +27,7 @@ export const createUser = async (req: any, res: any) => {
     );
     res.json("We've mailed you a confirmation link!");
   } catch (e: any) {
+    console.log(e);
     res.status(401);
     res.json(e);
   }
@@ -44,7 +37,7 @@ export const signIn = async (req: any, res: any) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        username: req.body.username,
+        email: req.body.email,
       },
     });
     const isValid = await comparePasswords(req.body.password, user?.password);
@@ -62,7 +55,7 @@ export const signIn = async (req: any, res: any) => {
     }
 
     const token = createJWT(user);
-    res.json({ token });
+    res.json({ token, username: user?.username });
   } catch (e: any) {
     res.status(401);
     res.json(e);
@@ -85,7 +78,7 @@ export const confirmMail = async (req: any, res: any) => {
       },
     });
     const token = createJWT(user);
-    res.json(token);
+    res.json({ token, username: user?.username });
   } catch (e: any) {
     res.status(401);
     res.json(e);
@@ -94,10 +87,15 @@ export const confirmMail = async (req: any, res: any) => {
 
 export const sendPasswordReset = async (req: any, res: any) => {
   try {
+    await prisma.tokenPasswordReset.deleteMany({
+      where: {
+        userEmail: req.query.email,
+      },
+    });
     const token = await prisma.tokenPasswordReset.create({
       data: {
         user: {
-          connect: { email: "test@test.com" },
+          connect: { email: req.body.email },
         },
       },
       include: {
@@ -119,6 +117,7 @@ export const sendPasswordReset = async (req: any, res: any) => {
 
 export const handlePasswordReset = async (req: any, res: any) => {
   try {
+    console.log(req.query);
     const token = await prisma.tokenPasswordReset.delete({
       where: {
         userEmail_token: {
@@ -135,9 +134,18 @@ export const handlePasswordReset = async (req: any, res: any) => {
         password: await hashPassword(req.body.password),
       },
     });
-    res.json("Password changed! You can now login using the new password");
+    const user = await prisma.user.findUnique({
+      where: {
+        email: token.userEmail,
+      },
+    });
+    const jwt = createJWT(user);
+    res.json({ jwt, username: user?.username });
   } catch (e: any) {
-    res.json(401);
+    console.log(e);
+    res.status(401);
     res.json(e);
   }
 };
+
+export const uploadUserProfileImage = (req: any, res: any) => {};
